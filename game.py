@@ -14,7 +14,7 @@ class Game:
         self.height = 600
         self.win = pygame.display.set_mode(((self.width,self.height)))
         # comment this for develop
-        self.enemies = [Creep(1,1,log_level=log_level)]
+        self.enemies = [Creep(log_level=log_level)]
         self.towers = []
         self.lives = 10
         self.money = 100
@@ -30,6 +30,13 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+            to_del = []
+            for enemey in self.enemies:
+                # works only for moving from left to right
+                if enemey.reach_final:
+                    to_del.append(enemey)
+            for d in to_del:
+                self.enemies.remove(d)
             self.draw()
         pygame.quit()
 

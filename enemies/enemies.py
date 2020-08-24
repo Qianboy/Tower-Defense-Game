@@ -4,13 +4,11 @@ import pickle
 import logging
 
 class Enemey:
-    def __init__(self,x ,y,log_level):
+    def __init__(self,log_level):
         # position
         logging.basicConfig()
         self.logger = logging.getLogger('Enemey')
         self.logger.setLevel(log_level)
-        self.x = x
-        self.y = y
         self.width = 64
         self.height = 64
         self.vel = 10
@@ -18,8 +16,10 @@ class Enemey:
         self.health = 1
         with open('path.pkl', 'rb') as f:
             self.path = pickle.load(f)
-        self.target_index = 0
+        self.x,self.y = self.path[0]
+        self.target_index = 1
         self.imgs = []
+        self.reach_final = 0
 
     def draw(self,win):
         """
@@ -34,7 +34,7 @@ class Enemey:
             self.animation_count = 0
         #draw
         self.logger.debug('Draw enemey at position of [%s,%s]'%(self.x,self.y))
-        win.blit(self.img,(self.x,self.y))
+        win.blit(self.img,(self.x-self.width//2,self.y-self.height//2))
         self.move()
 
     def collide(self,x,y):
@@ -72,13 +72,10 @@ class Enemey:
         Move enemy following path
         :return: None
         """
-        x1,y1 = self.path[self.target_index]
-        if self.target_index > len(self.path):
-            x2,y2 = (-10,355) #???
-        else:
-            x2,y2 = self.path[self.target_index+1]
+        x1,y1 = self.path[self.target_index-1]
+        x2,y2 = self.path[self.target_index]
         distance = np.linalg.norm([x2-x1,y2-y1])
-        angle = np.arctan((y2-y1)/(x2-x1))
+        angle = np.arctan((y2-y1)/(x2-x1+ 0.0001))
         move_x = self.vel * np.cos(angle)
         move_y = self.vel * np.sin(angle)
         x_new, y_new = [self.x + np.sign(x2-x1) * move_x,
@@ -87,9 +84,11 @@ class Enemey:
                                             last_target=[x1,y1],
                                             next_target=[x2,y2]):
             self.x,self.y = x2,y2
+            self.target_index += 1
+            if self.target_index >= len(self.path):
+                self.reach_final = 1
         else:
             self.x, self.y = x_new, y_new
-
 
 
     def hit(self):
