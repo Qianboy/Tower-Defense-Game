@@ -3,23 +3,27 @@ import numpy as np
 import pickle
 import logging
 
-class Enemey:
-    def __init__(self,log_level):
+
+class Enemy:
+    def __init__(self, log_level):
         # position
         logging.basicConfig()
-        self.logger = logging.getLogger('Enemey')
+        self.logger = logging.getLogger('Enemy')
         self.logger.setLevel(log_level)
-        self.width = 64
-        self.height = 64
-        self.vel = 10
+        self.width = 90
+        self.height = 90
+        self.vel = 1
         self.animation_count = 0
         self.health = 1
+        # load saved via points for path
         with open('path.pkl', 'rb') as f:
             self.path = pickle.load(f)
-        self.x,self.y = self.path[0]
-        self.target_index = 1
+        # create init point outside of window so enemy will walk into the window
+        self.x, self.y = [self.path[0][0] - self.width,self.path[0][1]]
+        self.target_viapoint_index = 0
         self.imgs = []
         self.reach_final = 0
+        self.flip = 0
 
     def draw(self,win):
         """
@@ -27,14 +31,16 @@ class Enemey:
         :param win:
         :return:
         """
-
         self.img = self.imgs[self.animation_count]
+        if self.flip:
+            draw_img = pygame.transform.flip(self.img, True, True)
+        else:
+            draw_img = self.img
         self.animation_count += 1
         if self.animation_count >= len(self.imgs):
             self.animation_count = 0
-        #draw
-        self.logger.debug('Draw enemey at position of [%s,%s]'%(self.x,self.y))
-        win.blit(self.img,(self.x-self.width//2,self.y-self.height//2))
+        self.logger.debug('Draw enemy at position of [%s,%s]'%(self.x, self.y))
+        win.blit(draw_img, (self.x-self.width//2, self.y-self.height//2))
         self.move()
 
     def collide(self,x,y):
@@ -72,8 +78,8 @@ class Enemey:
         Move enemy following path
         :return: None
         """
-        x1,y1 = self.path[self.target_index-1]
-        x2,y2 = self.path[self.target_index]
+        x1,y1 = self.path[self.target_viapoint_index-1]
+        x2,y2 = self.path[self.target_viapoint_index]
         distance = np.linalg.norm([x2-x1,y2-y1])
         angle = np.arctan((y2-y1)/(x2-x1+ 0.0001))
         move_x = self.vel * np.abs(np.cos(angle))
@@ -81,20 +87,27 @@ class Enemey:
         self.logger.debug('next move goes in direction of %s x and %s y'%(np.sign(x2-x1),np.sign(y2-y1)))
         x_new, y_new = [self.x + np.sign(x2-x1) * move_x,
                         self.y + np.sign(y2-y1) * move_y]
+        # flipping enemy if it goes backwards
+        mark_straight_line_x_error = 5
+        if x2 < x1 - mark_straight_line_x_error:
+            # original image needs flip once
+            self.flip = 0
+        else:
+            self.flip = 1
+
         if self._check_if_reach_next_target([x_new,y_new],
                                             last_target=[x1,y1],
                                             next_target=[x2,y2]):
             self.x,self.y = x2,y2
-            self.target_index += 1
-            if self.target_index >= len(self.path):
+            self.target_viapoint_index += 1
+            if self.target_viapoint_index >= len(self.path):
                 self.reach_final = 1
         else:
             self.x, self.y = x_new, y_new
 
-
     def hit(self):
         """
-        Return if an enemey was dead
+        Return if an enemy was dead
         :return:
         """
         self.health -= 1

@@ -1,7 +1,7 @@
 import pygame
 import os
 import pickle
-from enemies import Enemey, Creep
+from enemies import Enemy, RangedCreep, MeleeCreep, Roshan
 import logging
 
 class Game:
@@ -14,27 +14,28 @@ class Game:
         self.height = 600
         self.win = pygame.display.set_mode(((self.width,self.height)))
         # comment this for develop
-        self.enemies = [Creep(log_level=log_level)]
+        self.enemies = [MeleeCreep(log_level=log_level),
+                        RangedCreep(log_level=log_level),
+                        Roshan(log_level=log_level)]
         self.towers = []
         self.lives = 10
         self.money = 100
         self.bg = pygame.image.load(os.path.join("assets","bg.png"))
         self.bg = pygame.transform.scale(self.bg,(self.width,self.height))
 
-
     def run(self):
         run = True
         clock = pygame.time.Clock()
         while run:
-            clock.tick(10)
+            clock.tick(100)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
             to_del = []
-            for enemey in self.enemies:
+            for enemy in self.enemies:
                 # works only for moving from left to right
-                if enemey.reach_final:
-                    to_del.append(enemey)
+                if enemy.reach_final:
+                    to_del.append(enemy)
             for d in to_del:
                 self.enemies.remove(d)
 
@@ -44,8 +45,8 @@ class Game:
     def draw(self):
         self.win.blit(self.bg,(0,0))
         # draw enemies
-        for enemey in self.enemies:
-            enemey.draw(self.win)
+        for enemy in self.enemies:
+            enemy.draw(self.win)
         pygame.display.update()
 
     def develop(self):
@@ -77,4 +78,4 @@ if __name__ == "__main__":
     game = Game()
     # game.develop()
     game.run()
-    # enemey = Enemey(1,1,1,1)
+    # enemy = Enemy(1,1,1,1)
