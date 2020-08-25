@@ -76,8 +76,9 @@ class Enemey:
         x2,y2 = self.path[self.target_index]
         distance = np.linalg.norm([x2-x1,y2-y1])
         angle = np.arctan((y2-y1)/(x2-x1+ 0.0001))
-        move_x = self.vel * np.cos(angle)
-        move_y = self.vel * np.sin(angle)
+        move_x = self.vel * np.abs(np.cos(angle))
+        move_y = self.vel * np.abs(np.sin(angle))
+        self.logger.debug('next move goes in direction of %s x and %s y'%(np.sign(x2-x1),np.sign(y2-y1)))
         x_new, y_new = [self.x + np.sign(x2-x1) * move_x,
                         self.y + np.sign(y2-y1) * move_y]
         if self._check_if_reach_next_target([x_new,y_new],
