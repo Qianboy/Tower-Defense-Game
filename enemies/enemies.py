@@ -33,7 +33,7 @@ class Enemy:
         """
         self.img = self.imgs[self.animation_count]
         if self.flip:
-            draw_img = pygame.transform.flip(self.img, True, True)
+            draw_img = pygame.transform.flip(self.img, True, False)
         else:
             draw_img = self.img
         self.animation_count += 1
