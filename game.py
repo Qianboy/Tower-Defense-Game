@@ -2,6 +2,7 @@ import pygame
 import os
 import pickle
 from enemies import Enemy, RangedCreep, MeleeCreep, Roshan
+from towers import Tower, ArcherTower
 import logging
 
 class Game:
@@ -17,7 +18,7 @@ class Game:
         self.enemies = [MeleeCreep(log_level=log_level),
                         RangedCreep(log_level=log_level),
                         Roshan(log_level=log_level)]
-        self.towers = []
+        self.towers = [ArcherTower(x=100,y=100)]
         self.lives = 10
         self.money = 100
         self.bg = pygame.image.load(os.path.join("assets","bg.png"))
@@ -39,6 +40,8 @@ class Game:
             for d in to_del:
                 self.enemies.remove(d)
 
+            for tw in self.towers:
+                tw.attack(self.enemies)
             self.draw()
         pygame.quit()
 
@@ -47,6 +50,10 @@ class Game:
         # draw enemies
         for enemy in self.enemies:
             enemy.draw(self.win)
+
+        # draw towers
+        for tower in self.towers:
+            tower.draw(self.win)
         pygame.display.update()
 
     def develop(self):
