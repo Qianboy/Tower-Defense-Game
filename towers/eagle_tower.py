@@ -4,21 +4,17 @@ import os
 import numpy as np
 
 
-class ArcherTower(Tower):
+class EagleTower(Tower):
     def __init__(self,x,y):
         super().__init__(x,y)
         self.tower_imgs = []
         self.archer_imgs = []
         self.archer_count = []
         self.draw_range = False
-        img = super().load_img("archer_tower.png")
-        self.tower_imgs.append(img)
-        img = super().load_img("archer_tower_2.png")
-        self.tower_imgs.append(img)
-        img = super().load_img("archer_tower_3.png")
+        img = super().load_img("eagle_artillery.png")
         self.tower_imgs.append(img)
         # Tower attributes
-        self.range = 200
+        self.range = 500
 
     def draw(self, win):
         """

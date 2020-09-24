@@ -2,7 +2,7 @@ import pygame
 import os
 import pickle
 from enemies import Enemy, RangedCreep, MeleeCreep, Roshan
-from towers import Tower, ArcherTower
+from towers import Tower, ArcherTower, EagleTower, CannonTower
 import logging
 
 class Game:
@@ -18,11 +18,30 @@ class Game:
         self.enemies = [MeleeCreep(log_level=log_level),
                         RangedCreep(log_level=log_level),
                         Roshan(log_level=log_level)]
-        self.towers = [ArcherTower(x=100,y=100)]
+        # x width, y height
+        self.towers = [ArcherTower(x=100,y=100),EagleTower(x=200,y=200), CannonTower(x=500,y=400)]
         self.lives = 10
         self.money = 100
         self.bg = pygame.image.load(os.path.join("assets","bg.png"))
         self.bg = pygame.transform.scale(self.bg,(self.width,self.height))
+
+    def _activate_mouse_click_action(self,position):
+        """
+        Check where the mouse clicked, for tower then the attack range will be displayed
+        Args:
+            position: [x,y]
+
+        Returns:
+
+        """
+        # self.logger.debug('Pressed bottom is %s'%position)
+        for tower in self.towers:
+            if tower.click(position[0],position[1]):
+                tower.draw_range = not tower.draw_range
+                break
+        for enemy in self.enemies:
+            # TODO show enemy HP bar and info
+            pass
 
     def run(self):
         run = True
@@ -32,6 +51,11 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+                # if any mouse button is pressed
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # if the left button is pressed
+                    if event.button == 1:
+                        self._activate_mouse_click_action(event.pos)
             to_del = []
             for enemy in self.enemies:
                 # works only for moving from left to right

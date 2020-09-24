@@ -10,16 +10,15 @@ class Enemy:
         logging.basicConfig()
         self.logger = logging.getLogger('Enemy')
         self.logger.setLevel(log_level)
-        self.width = 90
-        self.height = 90
         self.vel = 1
         self.animation_count = 0
-        self.health = 1
+        # self.max_health = 1
+        # self.health = 1
         # load saved via points for path
         with open('path.pkl', 'rb') as f:
             self.path = pickle.load(f)
         # create init point outside of window so enemy will walk into the window
-        self.x, self.y = [self.path[0][0] - self.width,self.path[0][1]]
+        # self.x, self.y = [self.path[0][0] - self.width,self.path[0][1]]
         self.target_viapoint_index = 0
         self.imgs = []
         self.reach_final = 0
@@ -41,7 +40,14 @@ class Enemy:
             self.animation_count = 0
         self.logger.debug('Draw enemy at position of [%s,%s]'%(self.x, self.y))
         win.blit(draw_img, (self.x-self.width//2, self.y-self.height//2))
+        self.draw_health_bar(win)
         self.move()
+
+    def draw_health_bar(self,win):
+        length = self.health
+        hp_length = length * self.health //self.max_health
+        pygame.draw.rect(win,(255,0,0),(self.x - length//4,self.y-self.height//2,length, 10),0)
+        pygame.draw.rect(win,(0,255,0),(self.x - length//4,self.y-self.height//2,hp_length,10),0)
 
     def collide(self,x,y):
         """
