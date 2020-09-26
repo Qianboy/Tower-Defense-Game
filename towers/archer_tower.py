@@ -2,6 +2,7 @@ import pygame
 from towers import Tower
 import os
 import numpy as np
+from time import time
 
 
 class ArcherTower(Tower):
@@ -19,6 +20,9 @@ class ArcherTower(Tower):
         self.tower_imgs.append(img)
         # Tower attributes
         self.range = 200
+        self.damage = 10
+        self.attack_interval = 1 #second
+        self.last_hit_timer = time()
 
     def draw(self, win):
         """
@@ -38,19 +42,33 @@ class ArcherTower(Tower):
     def attack(self, enemies):
         """
         attacks an enemy in the enemy list, modifies the list
-        :param enemies:
-        :return:
-        """
-        self.inRange = False
-        # shoot the closest enemy
-        # TODO change policy to attack the very first enemy instead
-        enemy_in_range = []
-        for enemy in enemies:
-            distance = np.linalg.norm([self.x - enemy.x,self.y - enemy.y])
-            if distance < self.range:
-                self.inRange = True
-                enemy_in_range.append(enemy)
+        Args:
+            enemies:
 
-        # Attack the enemy on the front
-        # TODO enemy has attribute of life long
-        # enemy = enemy_in_range[0]
+        Returns:
+
+        """
+        if time() - self.last_hit_timer > self.attack_interval:
+            self.inRange = False
+            # shoot the closest enemy
+            # TODO change policy to attack the very first enemy instead
+            enemy_in_range = []
+            for enemy in enemies:
+                distance = np.linalg.norm([self.x - enemy.x, self.y - enemy.y])
+                if distance < self.range:
+                    self.inRange = True
+                    enemy_in_range.append(enemy)
+
+            if len(enemy_in_range):
+                # Attack the enemy on the front
+                # TODO enemy has attribute of life long
+                life_max = 0
+                front_enemy_index = 0
+                for index, enemy in enumerate(enemy_in_range):
+                    if enemy.life> life_max:
+                        life_max = enemy.life
+                        front_enemy_index = index
+                attacked_enemy = enemy_in_range[front_enemy_index]
+                attacked_enemy.hit(self.damage)
+
+            self.last_hit_timer = time()

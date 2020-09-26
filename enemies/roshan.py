@@ -1,7 +1,7 @@
 import pygame
 import os
 from enemies import Enemy
-
+from time import time
 
 class Roshan(Enemy):
     def __init__(self, log_level):
@@ -15,5 +15,7 @@ class Roshan(Enemy):
         self.imgs.append(creep_img)
 
         self.max_health = 100
-        self.health = 100
+        self.health = self.max_health
+        self.spawn_time = time()
+        self._life = 0
 

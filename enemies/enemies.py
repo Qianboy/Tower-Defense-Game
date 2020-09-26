@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 import pickle
 import logging
-
+from time import time
 
 class Enemy:
     def __init__(self, log_level):
@@ -18,7 +18,7 @@ class Enemy:
         with open('path.pkl', 'rb') as f:
             self.path = pickle.load(f)
         # create init point outside of window so enemy will walk into the window
-        # self.x, self.y = [self.path[0][0] - self.width,self.path[0][1]]
+        self.x, self.y = [self.path[0][0] - self.width, self.path[0][1]]
         self.target_viapoint_index = 0
         self.imgs = []
         self.reach_final = 0
@@ -44,8 +44,8 @@ class Enemy:
         self.move()
 
     def draw_health_bar(self,win):
-        length = self.health
-        hp_length = length * self.health //self.max_health
+        length = self.max_health
+        hp_length = length * self.health // self.max_health
         pygame.draw.rect(win,(255,0,0),(self.x - length//4,self.y-self.height//2,length, 10),0)
         pygame.draw.rect(win,(0,255,0),(self.x - length//4,self.y-self.height//2,hp_length,10),0)
 
@@ -56,7 +56,7 @@ class Enemy:
         :param y:
         :return: Bool
         """
-        if x <= self.x +self.wdith and x >= self.x:
+        if x <= self.x +self.width and x >= self.x:
             if y <= self.y +self.height and y >= self.y:
                 return True
         return False
@@ -78,6 +78,15 @@ class Enemy:
             return True
         else:
             return False
+
+    @property
+    def life(self):
+        """
+        Update life of enemy
+        Returns:
+
+        """
+        return time() - self.spawn_time
 
     def move(self):
         """
@@ -111,11 +120,12 @@ class Enemy:
         else:
             self.x, self.y = x_new, y_new
 
-    def hit(self):
+    def hit(self,damage):
         """
         Return if an enemy was dead
         :return:
         """
-        self.health -= 1
-        if self.health <= 0:
-            return True
+        self.health -= damage
+        # if self.health <= 0:
+        #     return True
+        # return False

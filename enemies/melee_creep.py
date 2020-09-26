@@ -1,7 +1,7 @@
 import pygame
 import os
 from enemies import Enemy
-
+from time import time
 
 class MeleeCreep(Enemy):
     def __init__(self, log_level):
@@ -13,7 +13,9 @@ class MeleeCreep(Enemy):
         creep_img = pygame.transform.scale(creep_img, (self.width, self.height))
         self.imgs.append(creep_img)
 
-        self.max_health = 30
-        self.health = 30
+        self.max_health = 40
+        self.health = self.max_health
+        self.spawn_time = time()
+        self._life = 0
 
 

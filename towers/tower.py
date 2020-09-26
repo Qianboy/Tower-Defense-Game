@@ -28,9 +28,11 @@ class Tower:
         """
         path_to_project = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..')
         image = cv2.imread(os.path.join(path_to_project,"assets", "towers", image_name))
+        # image [height, width]
         scale = image.shape[0]//self.height
         tower_img = pygame.image.load(os.path.join(path_to_project,"assets", "towers", image_name))
-        tower_img = pygame.transform.scale(tower_img, (image.shape[0]//scale, self.width))
+        # pygame image [width, height]
+        tower_img = pygame.transform.scale(tower_img, (image.shape[1]//scale, image.shape[0]//scale))
         return tower_img
 
     def draw(self, win):
