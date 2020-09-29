@@ -12,8 +12,6 @@ class Enemy:
         self.logger.setLevel(log_level)
         self.vel = 1
         self.animation_count = 0
-        # self.max_health = 1
-        # self.health = 1
         # load saved via points for path
         with open('path.pkl', 'rb') as f:
             self.path = pickle.load(f)
@@ -45,9 +43,12 @@ class Enemy:
 
     def draw_health_bar(self,win):
         length = self.max_health
-        hp_length = length * self.health // self.max_health
-        pygame.draw.rect(win,(255,0,0),(self.x - length//4,self.y-self.height//2,length, 10),0)
-        pygame.draw.rect(win,(0,255,0),(self.x - length//4,self.y-self.height//2,hp_length,10),0)
+        if self.health > 0:
+            hp_length = length * self.health // self.max_health
+        else:
+            hp_length =0
+        pygame.draw.rect(win,(255,0,0),(self.x - length//4,self.y-self.height//2,length, 5),0)
+        pygame.draw.rect(win,(0,255,0),(self.x - length//4,self.y-self.height//2,hp_length,5),0)
 
     def collide(self,x,y):
         """
@@ -80,13 +81,17 @@ class Enemy:
             return False
 
     @property
-    def life(self):
+    def age(self):
         """
-        Update life of enemy
+        Update age of enemy
         Returns:
 
         """
         return time() - self.spawn_time
+
+    @property
+    def life(self):
+        return self._life
 
     def move(self):
         """

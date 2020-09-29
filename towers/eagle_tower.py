@@ -2,7 +2,7 @@ import pygame
 from towers import Tower
 import os
 import numpy as np
-
+from time import time
 
 class EagleTower(Tower):
     def __init__(self,x,y):
@@ -11,10 +11,20 @@ class EagleTower(Tower):
         self.archer_imgs = []
         self.archer_count = []
         self.draw_range = False
+        self.tower_imgs = []
+        self._load_offline_images()
+        self.last_hit_timer = time()
+
+        # Tower attributes
+        self._range = [500,600,700]
+        self._damage = [50,70,100]
+        self.attack_interval = 5 #second
+        self._price = [100, 200, 300]
+        self._sell_price = [50, 100, 150]
+
+    def _load_offline_images(self):
         img = super().load_img("eagle_artillery.png")
         self.tower_imgs.append(img)
-        # Tower attributes
-        self.range = 500
 
     def draw(self, win):
         """
@@ -37,16 +47,6 @@ class EagleTower(Tower):
         :param enemies:
         :return:
         """
-        self.inRange = False
-        # shoot the closest enemy
-        # TODO change policy to attack the very first enemy instead
-        enemy_in_range = []
-        for enemy in enemies:
-            distance = np.linalg.norm([self.x - enemy.x,self.y - enemy.y])
-            if distance < self.range:
-                self.inRange = True
-                enemy_in_range.append(enemy)
-
-        # Attack the enemy on the front
-        # TODO enemy has attribute of life long
-        # enemy = enemy_in_range[0]
+        if time() - self.last_hit_timer > self.attack_interval:
+            self._attack(enemies,self.range,self.damage)
+            self.last_hit_timer = time()

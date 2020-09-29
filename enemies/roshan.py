@@ -5,8 +5,8 @@ from time import time
 
 class Roshan(Enemy):
     def __init__(self, log_level):
-        self.width = 192
-        self.height = 192
+        self.width = 96
+        self.height = 96
         super().__init__(log_level)
         creep_img = pygame.image.load(os.path.join("assets","enemies","roshan.png"))
         # self.width = int(1.5 * self.width)
@@ -17,5 +17,8 @@ class Roshan(Enemy):
         self.max_health = 100
         self.health = self.max_health
         self.spawn_time = time()
-        self._life = 0
+        self._age = 0
+
+        self._life = 3 # life cost when reaching destination
+
 

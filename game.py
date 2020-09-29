@@ -6,25 +6,30 @@ from towers import Tower, ArcherTower, EagleTower, CannonTower
 import logging
 from time import time
 import random
+pygame.font.init()
 
 class Game:
     def __init__(self):
-        self.log_level = logging.DEBUG
+        self.log_level = logging.INFO
         logging.basicConfig()
         self.logger = logging.getLogger('Game')
         self.logger.setLevel(self.log_level)
         self.width = 900
         self.height = 600
-        self.win = pygame.display.set_mode(((self.width,self.height)))
+        self.win = pygame.display.set_mode((self.width,self.height))
         # comment this for develop
         self.enemies = [RangedCreep(self.log_level)]
         self.last_spawn_enemy_time = time()
         # x width, y height
-        self.towers = [ArcherTower(x=100,y=100),EagleTower(x=200,y=200), CannonTower(x=500,y=400)]
-        self.lives = 10
+        self.towers = [ArcherTower(x=100,y=100),EagleTower(x=200,y=200), CannonTower(x=500,y=450)]
+        self.lifes = 10
         self.money = 100
         self.bg = pygame.image.load(os.path.join("assets","bg.png"))
         self.bg = pygame.transform.scale(self.bg,(self.width,self.height))
+        self.life_font = pygame.font.SysFont("comicsans",30)
+        self.life_image = pygame.image.load(os.path.join("assets","frontend","heart.jpg"))
+        self.money_font = pygame.font.SysFont("comicsans",30)
+        self.money_image = pygame.image.load(os.path.join("assets","frontend","coin.png"))
 
     def _activate_mouse_click_action(self,position):
         """
@@ -48,12 +53,13 @@ class Game:
         if time() - self.last_spawn_enemy_time > interval:
             self.enemies.append(random.choice([RangedCreep(self.log_level),MeleeCreep(self.log_level),Roshan(self.log_level)]))
             self.last_spawn_enemy_time = time()
+
     def run(self):
         run = True
         clock = pygame.time.Clock()
         while run:
             clock.tick(100)
-            self._spawn_enemy(5)
+            self._spawn_enemy(1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
@@ -65,15 +71,33 @@ class Game:
             to_del = []
             for enemy in self.enemies:
                 # works only for moving from left to right
-                if enemy.reach_final or enemy.health < 0:
+                if enemy.reach_final:
+                    self.lifes -= enemy.life
+                    to_del.append(enemy)
+                if enemy.health <= 0:
                     to_del.append(enemy)
             for d in to_del:
                 self.enemies.remove(d)
 
             for tw in self.towers:
                 tw.attack(self.enemies)
+
+            if self.lifes < 0:
+                print('You Loser!!!')
+                run = False
             self.draw()
         pygame.quit()
+
+    def _draw_black_rectangle(self,start_x,length):
+        """
+        Draw transparent black rectangle for displaying numbers e.g., money, lifes
+        Returns:
+
+        """
+        s = pygame.Surface((length, 30))  # the size of your rect
+        s.set_alpha(200)  # alpha level
+        s.fill((50, 50, 50))  # this fills the entire surface
+        self.win.blit(s, (start_x, 10))  # (0,0) are the top-left coordinates
 
     def draw(self):
         self.win.blit(self.bg,(0,0))
@@ -84,6 +108,23 @@ class Game:
         # draw towers
         for tower in self.towers:
             tower.draw(self.win)
+
+        # draw life
+        life_text = self.life_font.render(str(self.lifes), 1, (255, 255, 255))
+        heart = pygame.transform.scale(self.life_image, (30, 30))
+        start_heart_x = 15
+        self._draw_black_rectangle(start_heart_x+15,length=45)
+        self.win.blit(life_text, (start_heart_x + heart.get_width(), 14))
+        self.win.blit(heart, (start_heart_x, 12))
+
+        # draw money
+        coin_text = self.money_font.render(str(self.money), 1, (255,255,255))
+        coin = pygame.transform.scale(self.money_image, (30,30))
+        start_coin_x = start_heart_x + life_text.get_width() +heart.get_width() + 10
+        self._draw_black_rectangle(start_coin_x+15,length=55)
+        self.win.blit(coin_text,(start_coin_x + coin.get_width(), 14))
+        self.win.blit(coin,(start_coin_x,9))
+
         pygame.display.update()
 
     def develop(self):

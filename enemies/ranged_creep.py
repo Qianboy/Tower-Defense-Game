@@ -5,8 +5,8 @@ from time import time
 
 class RangedCreep(Enemy):
     def __init__(self, log_level):
-        self.width = 96
-        self.height = 96
+        self.width = 48
+        self.height = 48
         super().__init__(log_level)
         creep_img = pygame.image.load(os.path.join("assets","enemies","ranged_creep.png"))
         creep_img = pygame.transform.scale(creep_img, (self.width, self.height))
@@ -15,5 +15,8 @@ class RangedCreep(Enemy):
         self.max_health = 20
         self.health = self.max_health
         self.spawn_time = time()
-        self._life = 0
+        self._age = 1
+
+        self._life = 1 # life cost when reaching destination
+
 
