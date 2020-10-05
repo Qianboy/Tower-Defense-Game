@@ -35,7 +35,7 @@ class EagleTower(Tower):
         Returns:
 
         """
-        super().draw(win)
+        super()._draw(win)
         if self.draw_range:
             surface = pygame.Surface((self.range*4,self.range*4), pygame.SRCALPHA, 32)
             pygame.draw.circle(surface, (255, 0, 0, 80), (self.x, self.y), self.range, 0)
@@ -48,5 +48,7 @@ class EagleTower(Tower):
         :return:
         """
         if time() - self.last_hit_timer > self.attack_interval:
-            self._attack(enemies,self.range,self.damage)
+            attacked_flag = self._attack(enemies)
             self.last_hit_timer = time()
+            if attacked_flag:
+                self.attack_anno_counter += 1

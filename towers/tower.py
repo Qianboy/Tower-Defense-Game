@@ -14,7 +14,8 @@ class Tower:
         self.selected = False
         self.menu = None
         self.tower_imgs = []
-
+        self.attack_anno_counter = 0
+        self.attacked_enemy = []
     @property
     def price(self):
         return self._price[self.level - 1]
@@ -49,7 +50,7 @@ class Tower:
         tower_img = pygame.transform.scale(tower_img, (image.shape[1]//scale, image.shape[0]//scale))
         return tower_img
 
-    def draw(self, win):
+    def _draw(self, win):
 
         img = self.tower_imgs[self.level - 1]
         win.blit(img, (self.x-img.get_width()//2, self.y-img.get_height()//2))
@@ -61,8 +62,8 @@ class Tower:
         :param y: int
         :return: bool
         """
-        if self.x + self.width >= x > self.x:
-            if self.y + self.height >= y > self.y:
+        if self.x + self.width//2 >= x > self.x - self.width//2:
+            if self.y + self.height//2 >= y > self.y - self.height//2:
                 return True
         return False
 
@@ -91,7 +92,7 @@ class Tower:
         self.x = x
         self.y = y
 
-    def _attack(self,enemies, range, damage):
+    def _attack(self,enemies):
         """
         Find the first enemies in the attack range and attack it
         Args:
@@ -104,7 +105,7 @@ class Tower:
         enemy_in_range = []
         for enemy in enemies:
             distance = np.linalg.norm([self.x - enemy.x, self.y - enemy.y])
-            if distance < range:
+            if distance < self.range:
                 self.inRange = True
                 enemy_in_range.append(enemy)
         if len(enemy_in_range):
@@ -112,7 +113,44 @@ class Tower:
             front_enemy_index = 0
             for index, enemy in enumerate(enemy_in_range):
                 if enemy.age > age_max:
-                    age_max = enemy.life
+                    age_max = enemy.age
                     front_enemy_index = index
-            attacked_enemy = enemy_in_range[front_enemy_index]
-            attacked_enemy.hit(damage)
+            self.attacked_enemy = enemy_in_range[front_enemy_index]
+
+            return True
+        return False
+
+    def _draw_attack_annotation(self,win,interval=0,straight=False):
+        #TODO change the time from contact to distance dependent
+        if self.attack_anno_counter != 0:
+            fps = 100 #from game class
+            start_x = self.x
+            start_y = self.y - self.height//2
+            end_x = self.attacked_enemy.x - self.attacked_enemy.width//3
+            end_y = self.attacked_enemy.y - self.attacked_enemy.height//3
+            start_angle = 45 #deg
+            end_angle = -80
+            # end_angle = - np.abs(np.rad2deg(np.arctan((end_y - start_y)/(end_x - start_x))))
+            counter_max = fps * interval
+            middle_x = (start_x + end_x) // 2
+            middle_y = (start_y + end_y) // 2 - 50 #np.abs(start_x - end_x) // 3
+            a,b,c = np.polyfit([start_x,middle_x,end_x],[start_y,middle_y,end_y],2)
+            if self.attack_anno_counter < counter_max:
+                angle = (end_angle - start_angle) * self.attack_anno_counter / counter_max + start_angle
+
+                draw_x = (end_x - start_x) * self.attack_anno_counter / counter_max + start_x
+                if straight:
+                    draw_y = (end_y - start_y) * self.attack_anno_counter / counter_max + start_y
+                    attack_img = self.attack_img
+                else:
+                    draw_y = draw_x**2 * a + draw_x * b + c
+                    attack_img = pygame.transform.rotate(self.attack_img,angle)
+                # offset for attack img with it
+                win.blit(attack_img, (draw_x,draw_y))
+                self.attack_anno_counter += 1
+            else:
+                self.attacked_enemy.hit(self.damage)
+                self.attack_anno_counter = 0
+                self.attacked_enemy = []
+
+

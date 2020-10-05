@@ -14,14 +14,19 @@ class Game:
         logging.basicConfig()
         self.logger = logging.getLogger('Game')
         self.logger.setLevel(self.log_level)
+
+        # game attibutes
         self.width = 900
         self.height = 600
+        self.fps = 100
         self.win = pygame.display.set_mode((self.width,self.height))
         # comment this for develop
         self.enemies = [RangedCreep(self.log_level)]
         self.last_spawn_enemy_time = time()
         # x width, y height
         self.towers = [ArcherTower(x=100,y=100),EagleTower(x=200,y=200), CannonTower(x=500,y=450)]
+
+        # UI stuff
         self.lifes = 10
         self.money = 100
         self.bg = pygame.image.load(os.path.join("assets","bg.png"))
@@ -58,7 +63,7 @@ class Game:
         run = True
         clock = pygame.time.Clock()
         while run:
-            clock.tick(100)
+            clock.tick(self.fps)
             self._spawn_enemy(1)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -74,7 +79,7 @@ class Game:
                 if enemy.reach_final:
                     self.lifes -= enemy.life
                     to_del.append(enemy)
-                if enemy.health <= 0:
+                if enemy.health <= 0: 
                     to_del.append(enemy)
             for d in to_del:
                 self.enemies.remove(d)
