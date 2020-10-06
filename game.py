@@ -24,7 +24,7 @@ class Game:
         self.enemies = [RangedCreep(self.log_level)]
         self.last_spawn_enemy_time = time()
         # x width, y height
-        self.towers = [ArcherTower(x=100,y=100),EagleTower(x=200,y=200), CannonTower(x=500,y=450)]
+        self.towers = [ArcherTower(x=100,y=100),EagleTower(x=250,y=200), CannonTower(x=500,y=450)]
 
         # UI stuff
         self.lifes = 10
@@ -35,6 +35,23 @@ class Game:
         self.life_image = pygame.image.load(os.path.join("assets","frontend","heart.jpg"))
         self.money_font = pygame.font.SysFont("comicsans",30)
         self.money_image = pygame.image.load(os.path.join("assets","frontend","coin.png"))
+
+    def _activate_mouse_touch_action(self,position):
+        """
+        make tower bigger when cursor is on the tower
+        Args:
+            position: [x,y]
+
+        Returns:
+
+        """
+        for tower in self.towers:
+            if tower.click(position[0],position[1]):
+                if not tower.touched:
+                    tower.touched = True
+            else:
+                if tower.touched:
+                    tower.touched = False
 
     def _activate_mouse_click_action(self,position):
         """
@@ -73,6 +90,8 @@ class Game:
                     # if the left button is pressed
                     if event.button == 1:
                         self._activate_mouse_click_action(event.pos)
+                else:
+                    self._activate_mouse_touch_action(pygame.mouse.get_pos())
             to_del = []
             for enemy in self.enemies:
                 # works only for moving from left to right

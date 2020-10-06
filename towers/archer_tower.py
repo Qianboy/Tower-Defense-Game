@@ -11,10 +11,14 @@ class ArcherTower(Tower):
         self.tower_imgs = []
         self.archer_imgs = []
         self.archer_count = []
-        self.draw_range = False
         self.tower_imgs = []
+        # attack animation parameters
         self.attack_img = []
         self.attack_anno_start_angle = 45 #deg
+        self.bullet_from_x = self.x
+        self.bullet_from_y = self.y - self.height//2
+        self.attack_time = 0.5 #time for bullet to fly
+
         self._load_offline_images()
         self.last_hit_timer = time()
 
@@ -22,7 +26,6 @@ class ArcherTower(Tower):
         self._range = [200,220,250]
         self._damage = [10,20,30]
         self.attack_interval = 1 #second
-        self.attack_time = 0.5 #time for bullet to fly
         self._price = [100, 200, 300]
         self._sell_price = [50, 100, 150]
 
@@ -49,13 +52,7 @@ class ArcherTower(Tower):
         Returns:
 
         """
-        super()._draw(win)
-        if self.draw_range:
-            surface = pygame.Surface((self.range*4,self.range*4), pygame.SRCALPHA, 32)
-            pygame.draw.circle(surface, (255, 0, 0, 80), (self.x, self.y), self.range, 0)
-            win.blit(surface,(0,0))
-
-        self.draw_attack_annotation(win,interval=self.attack_time)
+        self._draw(win)
 
     def attack(self, enemies):
         """
@@ -64,11 +61,7 @@ class ArcherTower(Tower):
             enemies:
 
         """
-        if time() - self.last_hit_timer > self.attack_interval:
-            attacked_flag = self._attack(enemies)
-            self.last_hit_timer = time()
-            if attacked_flag:
-                self.attack_anno_counter += 1
+        self._attack(enemies)
 
     def draw_attack_annotation(self,win,interval):
-        super()._draw_attack_annotation(win,interval,straight=False)
+        self._draw_attack_annotation(win,interval,traj='parabola')

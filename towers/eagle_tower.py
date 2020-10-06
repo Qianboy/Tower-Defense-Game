@@ -15,16 +15,27 @@ class EagleTower(Tower):
         self._load_offline_images()
         self.last_hit_timer = time()
 
+        # attack animation parameters
+        self.bullet_from_x = self.x - self.width // 2
+        self.bullet_from_y = self.y - self.height // 2
+        self.attack_time = 1.5 #time for bullet to fly
+
         # Tower attributes
         self._range = [500,600,700]
         self._damage = [50,70,100]
-        self.attack_interval = 5 #second
+        self.attack_interval = 4 #second
         self._price = [100, 200, 300]
         self._sell_price = [50, 100, 150]
 
     def _load_offline_images(self):
         img = super().load_img("eagle_artillery.png")
         self.tower_imgs.append(img)
+        path_to_project = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+        attack_img = pygame.image.load(os.path.join(path_to_project, "assets", "towers", "fire.png"))
+        # pygame image [width, height]
+        # attack_img = pygame.transform.rotate(attack_img, -45)
+        attack_img = pygame.transform.scale(attack_img, (100, 100))
+        self.attack_img = attack_img
 
     def draw(self, win):
         """
@@ -35,11 +46,7 @@ class EagleTower(Tower):
         Returns:
 
         """
-        super()._draw(win)
-        if self.draw_range:
-            surface = pygame.Surface((self.range*4,self.range*4), pygame.SRCALPHA, 32)
-            pygame.draw.circle(surface, (255, 0, 0, 80), (self.x, self.y), self.range, 0)
-            win.blit(surface,(0,0))
+        self._draw(win)
 
     def attack(self, enemies):
         """
@@ -47,8 +54,7 @@ class EagleTower(Tower):
         :param enemies:
         :return:
         """
-        if time() - self.last_hit_timer > self.attack_interval:
-            attacked_flag = self._attack(enemies)
-            self.last_hit_timer = time()
-            if attacked_flag:
-                self.attack_anno_counter += 1
+        self._attack(enemies)
+
+    def draw_attack_annotation(self,win,interval):
+        self._draw_attack_annotation(win,interval,traj='updown')
