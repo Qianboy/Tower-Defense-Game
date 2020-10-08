@@ -3,6 +3,8 @@ import os
 import numpy as np
 import cv2
 from time import time
+from menu import Menu
+
 
 class Tower:
     def __init__(self, x, y):
@@ -11,14 +13,25 @@ class Tower:
         self.width = 96
         self.height = 96
         self.level = 1
-        self.selected = False
-        self.menu = None
         self.tower_imgs = []
         self.attack_anno_counter = 0
         self.attacked_enemy = []
+        self.sold = False
         # mouse event trigger flag
-        self.draw_range = False
+        self.clicked = False
         self.touched = False
+        # menu
+        path_to_project = os.path.join(os.path.dirname(os.path.abspath(__file__)),'..')
+        bar_ring = pygame.image.load(os.path.join(path_to_project, "assets", "frontend", "bar_ring.png"))
+        bar_ring = pygame.transform.scale(bar_ring,(100,100))
+        self.menu_ring = Menu(self.x,self.y,img=bar_ring)
+        menu_upgrade = pygame.image.load(os.path.join(path_to_project, "assets", "frontend", "upgrade.png"))
+        menu_upgrade = pygame.transform.scale(menu_upgrade, (30, 30))
+        self.menu_upgrade = Menu(self.x, self.y-50, img=menu_upgrade)
+        menu_sell = pygame.image.load(os.path.join(path_to_project, "assets", "frontend", "sell.png"))
+        menu_sell = pygame.transform.scale(menu_sell, (30, 30))
+        self.menu_sell = Menu(self.x, self.y + 50, img=menu_sell)
+
     @property
     def price(self):
         return self._price[self.level - 1]
@@ -63,22 +76,67 @@ class Tower:
         if self.touched:
             img = pygame.transform.scale(img, (int(1.2 * img.get_width()),int(1.2 * img.get_height())))
         win.blit(img, (self.x-img.get_width()//2, self.y-img.get_height()//2))
-        if self.draw_range:
-            surface = pygame.Surface((self.range*4,self.range*4), pygame.SRCALPHA, 32)
-            pygame.draw.circle(surface, (255, 0, 0, 80), (self.x, self.y), self.range, 0)
-            win.blit(surface,(0,0))
+        if self.clicked:
+            surface = pygame.Surface((self.range*4, self.range*4), pygame.SRCALPHA, 32)
+            pygame.draw.circle(surface, (255, 0, 0, 80), (self.range*2, self.range*2), self.range, 0)
+            win.blit(surface,(self.x - self.range*2,self.y - self.range*2))
+            self.menu_ring.draw(win)
+            self.menu_sell.draw(win)
+            if self.level != self.level_max:
+                self.menu_upgrade.draw(win)
         self.draw_attack_annotation(win,interval=self.attack_time)
+
+    def menu_click(self,x,y):
+        """
+        return if the menu botton is clicked
+        Args:
+            x:
+            y:
+
+        Returns: bool
+
+        """
+        if self.menu_upgrade.click(x,y):
+            self.upgrade()
+            return True
+        elif self.menu_sell.click(x,y):
+            self.sell()
+            return True
+        return False
 
     def click(self, x, y):
         """
-        returns True if tower has been clicked
-        :param x: int
-        :param y: int
-        :return: bool
+        make tower status of clicked if tower has been clicked
+        Args:
+            x: int, width
+            y: int, height
+
+        Returns: bool
+
+        """
+        if not self.clicked:
+            if self.x + self.width//2 >= x > self.x - self.width//2:
+                if self.y + self.height//2 >= y > self.y - self.height//2:
+                    self.clicked = True
+        else:
+            self.menu_click(x,y)
+            self.clicked = False
+
+    def touch(self, x, y):
+        """
+        return True if tower has been touched by cursor
+        Args:
+            x: int width
+            y: int height
+
+        Returns:
+
         """
         if self.x + self.width//2 >= x > self.x - self.width//2:
             if self.y + self.height//2 >= y > self.y - self.height//2:
+                self.touched = True
                 return True
+        self.touched = False
         return False
 
     def sell(self):
@@ -86,7 +144,7 @@ class Tower:
         call to sell the tower, returns sell price
         :return: int
         """
-        return self.sell_price[self.level - 1]
+        self.sold = True
 
     def upgrade(self):
         """

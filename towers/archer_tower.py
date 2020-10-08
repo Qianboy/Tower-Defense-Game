@@ -12,17 +12,17 @@ class ArcherTower(Tower):
         self.archer_imgs = []
         self.archer_count = []
         self.tower_imgs = []
-        # attack animation parameters
-        self.attack_img = []
-        self.attack_anno_start_angle = 45 #deg
-        self.bullet_from_x = self.x
-        self.bullet_from_y = self.y - self.height//2
-        self.attack_time = 0.5 #time for bullet to fly
 
         self._load_offline_images()
         self.last_hit_timer = time()
 
+        # attack animation parameters
+        self.attack_anno_start_angle = 45 #deg
+        self.bullet_from_x = self.x
+        self.bullet_from_y = self.y - self.height//2
+        self.attack_time = 0.5 #time for bullet to fly
         # Tower attributes
+        self.level_max = 3
         self._range = [200,220,250]
         self._damage = [10,20,30]
         self.attack_interval = 1 #second

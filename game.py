@@ -1,12 +1,13 @@
 import pygame
 import os
 import pickle
-from enemies import Enemy, RangedCreep, MeleeCreep, Roshan
-from towers import Tower, ArcherTower, EagleTower, CannonTower
+from enemies import RangedCreep, MeleeCreep, Roshan
+from towers import ArcherTower, EagleTower, CannonTower
 import logging
 from time import time
 import random
 pygame.font.init()
+
 
 class Game:
     def __init__(self):
@@ -15,7 +16,7 @@ class Game:
         self.logger = logging.getLogger('Game')
         self.logger.setLevel(self.log_level)
 
-        # game attibutes
+        # game attributes
         self.width = 900
         self.height = 600
         self.fps = 100
@@ -46,12 +47,7 @@ class Game:
 
         """
         for tower in self.towers:
-            if tower.click(position[0],position[1]):
-                if not tower.touched:
-                    tower.touched = True
-            else:
-                if tower.touched:
-                    tower.touched = False
+            tower.touch(position[0], position[1])
 
     def _activate_mouse_click_action(self,position):
         """
@@ -63,10 +59,10 @@ class Game:
 
         """
         # self.logger.debug('Pressed bottom is %s'%position)
+        clicked_tower_index = 0
         for tower in self.towers:
-            if tower.click(position[0],position[1]):
-                tower.draw_range = not tower.draw_range
-                break
+            tower.click(position[0],position[1])
+
         for enemy in self.enemies:
             # TODO show enemy HP bar and info
             pass
@@ -92,6 +88,7 @@ class Game:
                         self._activate_mouse_click_action(event.pos)
                 else:
                     self._activate_mouse_touch_action(pygame.mouse.get_pos())
+
             to_del = []
             for enemy in self.enemies:
                 # works only for moving from left to right
@@ -102,9 +99,15 @@ class Game:
                     to_del.append(enemy)
             for d in to_del:
                 self.enemies.remove(d)
-
-            for tw in self.towers:
-                tw.attack(self.enemies)
+            to_del = []
+            for tower in self.towers:
+                if tower.sold:
+                    to_del.append(tower)
+                    self.money += tower.sell_price
+                else:
+                    tower.attack(self.enemies)
+            for d in to_del:
+                self.towers.remove(d)
 
             if self.lifes < 0:
                 print('You Loser!!!')

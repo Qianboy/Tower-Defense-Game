@@ -21,6 +21,7 @@ class EagleTower(Tower):
         self.attack_time = 1.5 #time for bullet to fly
 
         # Tower attributes
+        self.level_max = 3
         self._range = [500,600,700]
         self._damage = [50,70,100]
         self.attack_interval = 4 #second

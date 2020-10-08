@@ -4,6 +4,7 @@ import os
 import numpy as np
 from time import time
 
+
 class CannonTower(Tower):
     def __init__(self,x,y):
         super().__init__(x,y)
@@ -11,15 +12,16 @@ class CannonTower(Tower):
         self.archer_imgs = []
         self.archer_count = []
         self.tower_imgs = []
-        self.attack_img = []
         self._load_offline_images()
         self.last_hit_timer = time()
+
         # attack animation parameters
         self.attack_time = 0.15
         self.bullet_from_x = self.x - self.width//3
         self.bullet_from_y = self.y + self.height // 4
 
         # Tower attributes
+        self.level_max = 3
         self._range = [100,120,150]
         self._damage = [5,8,12]
         self.attack_interval = 0.3 #second
@@ -54,7 +56,6 @@ class CannonTower(Tower):
         attacks an enemy in the enemy list, modifies the list
         Args:
             enemies:
-        Returns:
 
         """
         self._attack(enemies)
